@@ -42,9 +42,13 @@ func Workflow(ctx workflow.Context, name string) (string, error) {
 
 	finalResult := result1 + " " + result2
 
-	// Use workflow start time for deterministic randomization
-	randomValue := workflow.GetInfo(ctx).WorkflowStartTime.UnixNano() % 2
-	if randomValue == 0 { // 50% chance
+	// Use workflow ID hash for deterministic randomization
+	workflowID := workflow.GetInfo(ctx).WorkflowExecution.ID
+	hash := 0
+	for i, char := range workflowID {
+		hash = (hash*31 + int(char)*int(i+1)) % 100
+	}
+	if hash < 50 { // 50% chance
 		logger.Info("Executing Activity3")
 		var result3 string
 		err = workflow.ExecuteActivity(ctx, Activity3, "Activity3").Get(ctx, &result3)

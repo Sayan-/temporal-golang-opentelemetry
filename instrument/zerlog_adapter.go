@@ -17,8 +17,16 @@ func NewZerologAdapter() *ZerologAdapter {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
+	runLogFile, _ := os.OpenFile(
+		"myapp.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0664,
+	)
+
+	multi := zerolog.MultiLevelWriter(os.Stdout, runLogFile)
+
 	// Create logger with proper configuration
-	zerologLogger := zerolog.New(os.Stdout).
+	zerologLogger := zerolog.New(multi).
 		With().
 		Timestamp().
 		Caller().
